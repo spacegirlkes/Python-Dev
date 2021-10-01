@@ -4,3 +4,7 @@ people = [
     {"name": "Draco", "house": "Slytherin"}
 
 ]
+
+people.sort()
+
+print(people)
