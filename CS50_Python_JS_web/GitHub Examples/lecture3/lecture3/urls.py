@@ -23,5 +23,6 @@ urlpatterns = [
     # add hello path and include all of the urls from urls.py of my hello application
     # This will link the url configuration files together
     # hello is the module and include urls file
-    path('hello/', include("hello.urls"))
+    path('hello/', include("hello.urls")),
+    path('newyear/', include("newyear.urls"))
 ]
