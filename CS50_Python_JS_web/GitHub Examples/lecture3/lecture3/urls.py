@@ -24,5 +24,6 @@ urlpatterns = [
     # This will link the url configuration files together
     # hello is the module and include urls file
     path('hello/', include("hello.urls")),
-    path('newyear/', include("newyear.urls"))
-]
+    path('newyear/', include("newyear.urls")),
+    path('tasks/', include("tasks.urls"))
+    ]

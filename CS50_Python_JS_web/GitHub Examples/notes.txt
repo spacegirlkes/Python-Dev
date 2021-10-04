@@ -1,0 +1,18 @@
+Make new app:
+
+1. python .\manage.py startapp 'appname'
+2. settings.py inside main folder sub folder of same name (ex. lecture3, lecture3)
+3. under 'INSTALLED_APPS = [' area add the name of the new app
+4. urls.py inside main folder sub folder of same name (ex. lecture3, lecture3) and add the path
+5. inside of new app make a urls.py file and add this information to it:
+
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index")
+
+]
+
+6. 
