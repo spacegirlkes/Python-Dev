@@ -15,4 +15,4 @@ urlpatterns = [
 
 ]
 
-6. 
+6. go to views.py inside app folder
