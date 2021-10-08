@@ -16,3 +16,78 @@ urlpatterns = [
 ]
 
 6. go to views.py inside app folder
+
+
+Start New project in django:
+
+(Using VSCode with terminal)
+Go to folder where you want to have the project
+
+1. python -m django startproject airline
+2. cd .\airline\
+3. code .
+4. python .\manage.py startapp flights
+5. airline folder -> settings.py
+6. INSTALLED_APPS = [ 'flights', ...
+7. urls.py
+8. urlpatterns = [
+    path('admin/', admin.site.urls),
+    path("flights/", include("flights.urls")) <-- add this line
+]
+9.flights folder -> create urls.py
+10. Add this into urls.py:
+
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+
+]
+
+11. models.py
+12.  Add this
+
+class Flight(models.Model):
+    # one model for each of the main tables we care about storing information about
+    origin = models.CharField(max_length=64)
+    destination = models.CharField(max_length=64)
+    duration = models.IntegerField()
+
+13. Need to make a migration -> python manage.py makemigrations
+14. flights\migrations\0001_initial.py has been created
+15. python manage.py migrate
+16. database file now created (use ls to confirm)
+17. python manage.py shell <-- allow us to execute python commands on this web app
+
+HOW TO INSERT DATA INTO THIS TABLE
+18. from flights.models import Flight
+19. f = Flight(origin="New York", destination="London", duration=415)
+20. f.save()
+
+21. Flight.objects.all() <-- equivalent to Select-All
+22. go to models.py under flights folder
+23. add this to return information when queried:
+
+    def __str__(self):
+        return f"{self.id}: {self.origin} to {self.destination}"
+24. python manage.py shell
+25. 
+>>> from flights.models import Flight
+>>> flights = Flight.objects.all()    
+>>> flights
+<QuerySet [<Flight: 1: New York to London>]>
+>>> flight = flights.first()
+>>> flight
+<Flight: 1: New York to London>
+>>> flight.id
+1
+>>> flight.origin
+'New York'
+>>> flight.destination
+'London'
+>>> flight.duration
+415
+>>> flight.delete()
+(1, {'flights.Flight': 1})
+>>>
