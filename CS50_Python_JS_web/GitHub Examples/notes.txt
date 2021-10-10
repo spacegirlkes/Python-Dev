@@ -91,3 +91,134 @@ HOW TO INSERT DATA INTO THIS TABLE
 >>> flight.delete()
 (1, {'flights.Flight': 1})
 >>>
+26. models.py
+27. update code:
+class Airport(models.Model):
+    code = models.CharField(max_length=3)
+    city = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"{self.city} ({self.code})"
+
+class Flight(models.Model):
+    # one model for each of the main tables we care about storing information about
+    # origin = models.CharField(max_length=64)
+    # cascade deletes and airpot from airport table and the flights associated
+    # related_name is a way to access a relationship in reverse order
+    origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departures") 
+    # destination = models.CharField(max_length=64)
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arrivals")
+    duration = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.id}: {self.origin} to {self.destination}"
+
+28. python manage.py makemigrations # look for any new changes that have been made to models.py and create a migration instruction for how to make those changes to the database
+
+Migrations for 'flights':
+  flights\migrations\0002_auto_20211008_1906.py
+    - Create model Airport
+    - Alter field destination on flight
+    - Alter field origin on flight
+29. python manage.py migrate # to apply the changes
+30. python .\manage.py shell
+31. from flights.models import *
+32. now you can create airports with parameters
+33. jfk = Airport(code = "JFK", city="New York")
+34. jfk.save()
+35. lhr = Airport(code = "LHR", city="London")
+36. lhr.save()
+37. cdg = Airport(code = "CDG", city="Paris")
+38. cdg.save()
+39. nrt = Airport(code = "NRT", city="Tokyo")
+40. nrt.save()
+41. f = Flight(origin=jfk, destination=lhr, duration=415) # add a flight
+42. f.save()
+43. 
+>>> f
+<Flight: 1: New York (JFK) to London (LHR)>
+>>> f.origin
+<Airport: New York (JFK)>
+>>> f.origin.city
+'New York'
+>>> f.origin.code
+'JFK'
+>>> lhr.arrivals.all()
+<QuerySet [<Flight: 1: New York (JFK) to London (LHR)>]>
+>>>
+44. urls.py # under flights folder
+45. update code:
+urlpatterns = [
+    path("", views.index, name="index")
+]
+46. views.py -> update code:
+from .models import Flight
+
+# Create your views here.
+def index(request):
+    return render(request, "flights/index.html", {
+        # give index.html access to a variable called flights and gives me all the flights - since we used Flight.objects.all()
+        "flights": Flight.objects.all()
+    })
+47. flights-> new folder templates -> new folder flights -> new file layout.html
+48. Create default layout for layout.html:
+
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <title>Flights</title>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
+49. create index.html to same folder
+50. Add this code:
+{% extends "flights/layout.html" %}
+
+{% block body %}
+    <h1>Flights</h1>
+    <ul>
+        {% for flight in flights %}
+            <li>Flight {{ flight.id }}: {{ flight.origin}} to {{flight.destination}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+51. python .\manage.py runserver
+52. go to server http://127.0.0.1:8000/flights/ and it will render the page with 1 flight
+53. python .\manage.py shell <-- we're going to add more
+54. from flights.models import *
+54. Airport.objects.filter(city="New York") <-- gives us all the cities with new york
+<QuerySet [<Airport: New York (JFK)>]>
+>>> Airport.objects.filter(city="New York").first() <-- gives me the first and only thing in that query set
+<Airport: New York (JFK)>
+>>> Airport.objects.get(city="New York") <-- only get one result if it knows thats there's only going to be one airport with the city of new york. But will throw an error if there is ever more than one or none
+<Airport: New York (JFK)>
+>>> jfk = Airport.objects.get(city="New York") 
+>>> cdg = Airport.objects.get(city="Paris")
+>>> cdg
+<Airport: Paris (CDG)>
+>>> f = Flight(origin=jfk, destination=cdg, duration=435) <-- now we've added a new flight
+>>> f.save()
+55. python .\manage.py runserver
+56. go to server http://127.0.0.1:8000/flights/ and it will render the page with 2 flights
+57. using django admin now to create a new web app that will allow us to do this faster
+58. terminal --> python .\manage.py createsuperuser
+59. enter in info
+60. Now django has created a super user account for me in this web app
+61. need to add models to admin app
+62. flights -> models.py to recall the classes you created
+63. admin.py -> add this code:
+from .models import Flight, Airport
+
+# Register your models here.
+admin.site.register(Airport)
+admin.site.register(Flight)
+64. Now we just told Django's admin app that I would like to use the admin app to be able to manipulate airports and to be able to manipulate flights
+65. python .\manage.py runserver
+66. http://127.0.0.1:8000/admin/
+67. log in
+68. add/remove flights/airports
+69. Now we are going to create a page for each flight
+70. 

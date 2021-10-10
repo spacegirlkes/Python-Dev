@@ -1,10 +1,22 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 
 # Create your models here.
+class Airport(models.Model):
+    code = models.CharField(max_length=3)
+    city = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"{self.city} ({self.code})"
+
 class Flight(models.Model):
     # one model for each of the main tables we care about storing information about
-    origin = models.CharField(max_length=64)
-    destination = models.CharField(max_length=64)
+    # origin = models.CharField(max_length=64)
+    # cascade deletes and airpot from airport table and the flights associated
+    # related_name is a way to access a relationship in reverse order
+    origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departures") 
+    # destination = models.CharField(max_length=64)
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arrivals")
     duration = models.IntegerField()
 
     def __str__(self):
