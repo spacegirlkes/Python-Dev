@@ -21,3 +21,18 @@ class Flight(models.Model):
 
     def __str__(self):
         return f"{self.id}: {self.origin} to {self.destination}"
+
+# adding a passenger list
+class Passenger(models.Model):
+    first = models.CharField(max_length=64)
+    last = models.CharField(max_length=64)
+    # passengers will have flights associated with them which are a models.manytomanyfield with flight
+    # so every passenger could be associated with many flights
+    # blank=true allows passengers to have no flights
+    # related_name means if I have a passenger I can use the flights (variable at begining) attribute to access all of their flights
+    # If I have a flight I can use this passengers related_name to access all of the passengers who are on that flight
+    flights = models.ManyToManyField(Flight, blank=True, related_name="passengers")
+
+    #string representation of a passenger
+    def __str__(self):
+        return f"{self.first} {self.last}"

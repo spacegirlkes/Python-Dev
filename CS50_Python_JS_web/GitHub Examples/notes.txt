@@ -221,4 +221,109 @@ admin.site.register(Flight)
 67. log in
 68. add/remove flights/airports
 69. Now we are going to create a page for each flight
-70. 
+70. flights -> url.py
+71. add this code:
+# specify flight id as an int, then load flight view whose name will be flight
+path("<int:flight_id>", views.flight, name="flight")
+72. go to views.py
+73. add these lines below def index(request)
+def flight(request, flight_id):
+    # get me the flight whose id is equal to flight_id
+    flight = Flight.objects.get(pk=flight_id)
+    # render a template like flight/flight.html and pass the input to that the flight to flight.html
+    return render(request, "flights/flight.html", {
+        "flight": flight
+    })
+74. create a new template called flight.html in flights->template->flights->flight.html and add this code
+# page that displays information about any particular flight
+{% extends "flights/layout.html" %}
+
+{% block body %}
+<h1>Flight {{ flight.id }}</h1>
+
+<ul>
+    <li>Origin: {{ flight.origin }}</li>
+    <li>Destination: {{ flight.duration }}</li>
+    <li>Duration: {{ flight.duration }}</li>
+</ul>
+
+{% endblock %}
+75. test by going to http://127.0.0.1:8000/flights/1
+76. go to flights -> models.py
+77. add new class under class Flight
+
+# adding a passenger list
+class Passenger(models.Model):
+    first = models.CharField(max_length=64)
+    last = models.CharField(max_length=64)
+    # passengers will have flights associated with them which are a models.manytomanyfield with flight
+    # so every passenger could be associated with many flights
+    # blank=true allows passengers to have no flights
+    # related_name means if I have a passenger I can use the flights (variable at begining) attribute to access all of their flights
+    # If I have a flight I can use this passengers related_name to access all of the passengers who are on that flight
+    flights = models.ManyToManyField(Flight, blank=True, related_name="passengers")
+
+    #string representation of a passenger
+    def __str__(self):
+        return f"{self.first} {self.last}"
+78.python manage.py makemigrations (since i made changes to my model)
+Migrations for 'flights':
+  flights\migrations\0003_passenger.py
+    - Create model Passenger
+79. python manage.py migrate
+# now I have applied those changes to my actual database
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, flights, sessions
+Running migrations:
+  Applying flights.0003_passenger... OK
+80. go to flights-> admin.py and register Passenger , update code to
+
+from .models import Flight, Airport, Passenger
+
+# Register your models here.
+admin.site.register(Airport)
+admin.site.register(Flight)
+admin.site.register(Passenger)
+81. python manage.py runserver
+82. go to admin site and add passengers
+83. go to flights ->views.py and update code to:
+
+ 	"flight": flight,
+        # adding the passengers view to the page. we can do this b/c the 2nd passengers is a related name and getting all
+        # the passengers that are on that flight
+        "passengers": flight.passengers.all()
+84. go to flights->templates->flights->flight.html
+85. update code below last </ul> to
+
+    <h2>Passengers</h2>
+
+    <ul>
+        <!--  create loop to print out the passenger in the list item -->
+        {% for passenger in passengers %}
+            <li>{{ passenger }}</li>
+        {% empty %}
+            <li>No passengers.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'index' %}">Back to Flight List</a>
+
+{% endblock %}
+86. go to flights->templates->flights->index.html and update to
+
+{% extends "flights/layout.html" %}
+
+{% block body %}
+    <h1>Flights</h1>
+    <ul>
+        {% for flight in flights %}
+            <li>
+                <!-- now ive put every single flight insid of a link that takes me to the flight route
+                but b/c the flight route requires as an argument the flight id i can specify the flight
+                id here-->
+                <a href="{% url 'flight' flight.id %}">
+                Flight {{ flight.id }}: {{ flight.origin}} to {{flight.destination}}</li>
+                </a>
+                {% endfor %}
+    </ul>
+{% endblock %}

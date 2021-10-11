@@ -18,6 +18,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls), # need to add an admin account in order to use
-    path("flights/", include("flights.urls"))
+    path("flights/", include("flights.urls")),
+    path("users/", include("users.urls"))
 ]
 
